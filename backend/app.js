@@ -16,7 +16,7 @@ const apiLimiter = rateLimit({
 
 //! cors
 const corsOptions={
-  origin: ["https://saurabh-currency-converter.netlify.app/"],
+  origin: ["https://saurabh-currency-converter.netlify.app"],
 }
 
 //! Middleware
