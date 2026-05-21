@@ -8,13 +8,16 @@ function App() {
     to: "",
     amount: "",
   });
+
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const currencyCodes = ["USD", "EUR", "GBP", "GHS", "JPY", "CAD", "INR"];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -23,83 +26,113 @@ function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // http request
+
+    setLoading(true);
+
     try {
       const response = await axios.post(
         "http://localhost:5000/api/convert",
         formData,
       );
 
-      setResult(response?.data);
+      setResult(response.data);
       setError("");
     } catch (error) {
-      setError(
-        "Error",
-        error?.response ? error?.response?.data : error?.message,
-      );
+      setError(error?.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div>
-      <section className="hero">
-        <h1>Global Currency Converter</h1>
-        <p>Your go-to solution for real-time currency conversions worldwide.</p>
-      </section>
-      <section className="converter">
-        <form onSubmit={handleSubmit}>
-          <select
-            name="from"
-            value={formData.from}
-            onChange={handleChange}
-            className="input"
-          >
-            <option value="">Select From Currency</option>
-            {currencyCodes.map((code) => (
-              <option key={code} value={code}>
-                {code}
-              </option>
-            ))}
-          </select>
-          <select
-            name="to"
-            value={formData.to}
-            onChange={handleChange}
-            className="input"
-          >
-            <option value="">Select To Currency</option>
-            {currencyCodes.map((code) => (
-              <option key={code} value={code}>
-                {code}
-              </option>
-            ))}
-          </select>
-          <input
-            name="amount"
-            value={formData.amount}
-            onChange={handleChange}
-            placeholder="Amount"
-            type="number"
-            className="input"
-          />
-          <button type="submit" className="submit-btn">
-            Convert
-          </button>
-        </form>
-        {result && (
-          <div className="result">
-            <p>
-              Converted Amount: {result.convertedAmount} {result.target}
-            </p>
-            <p>Conversion Rate: {result.conversionRate}</p>
-          </div>
-        )}
-        {error && <p className="error">Error: {error}</p>}
-      </section>
-      <section className="additional-info">
-        <h2>Why Choose Global Currency Converter?</h2>
-        <p>Detailed explanations on advantages or instructions for use.</p>
-      </section>
+    <div className="app">
+      <div className="overlay"></div>
+
+      <div className="container">
+        <div className="hero">
+          <h1>Global Currency Converter</h1>
+          <p>
+            Convert currencies instantly with live exchange rates around the
+            world.
+          </p>
+        </div>
+
+        <div className="card">
+          <form onSubmit={handleSubmit} className="form">
+            <div className="input-group">
+              <label>From</label>
+              <select
+                name="from"
+                value={formData.from}
+                onChange={handleChange}
+                className="input"
+              >
+                <option value="">Select Currency</option>
+
+                {currencyCodes.map((code) => (
+                  <option key={code} value={code}>
+                    {code}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="input-group">
+              <label>To</label>
+
+              <select
+                name="to"
+                value={formData.to}
+                onChange={handleChange}
+                className="input"
+              >
+                <option value="">Select Currency</option>
+
+                {currencyCodes.map((code) => (
+                  <option key={code} value={code}>
+                    {code}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="input-group">
+              <label>Amount</label>
+
+              <input
+                type="number"
+                name="amount"
+                value={formData.amount}
+                onChange={handleChange}
+                placeholder="Enter amount"
+                className="input"
+              />
+            </div>
+
+            <button type="submit" className="submit-btn">
+              {loading ? "Converting..." : "Convert Currency"}
+            </button>
+          </form>
+
+          {result && (
+            <div className="result-card">
+              <h2>Conversion Result</h2>
+
+              <p className="amount">
+                {formData.amount} {formData.from} =
+              </p>
+
+              <h1>
+                {parseFloat(result.convertedAmount).toFixed(2)} {result.target}
+              </h1>
+
+              <p className="rate">Exchange Rate: {result.conversionRate}</p>
+            </div>
+          )}
+
+          {error && <p className="error">{error}</p>}
+        </div>
+      </div>
     </div>
   );
 }
