@@ -16,7 +16,7 @@ const apiLimiter = rateLimit({
 
 //! cors
 const corsOptions={
-  origin: ["http://localhost:5173"],
+  origin: ["https://saurabh-currency-converter.netlify.app/"],
 }
 
 //! Middleware
